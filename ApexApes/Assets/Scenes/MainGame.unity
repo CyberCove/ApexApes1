@@ -26573,6 +26573,9 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.5959, y: 11.8622, z: -5.229}
   m_LocalScale: {x: 4.479999, y: 0.5597, z: 1}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -69807,4 +69810,7 @@ SceneRoots:
   - {fileID: 356997879}
   - {fileID: 279177314}
   - {fileID: 1569256216}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
