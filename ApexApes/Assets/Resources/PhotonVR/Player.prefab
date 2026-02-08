@@ -2035,8 +2035,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Head: {fileID: 7404702250886733165}
   Body: {fileID: 5062317285965503532}
-  LeftHand: {fileID: 2117003369908290678}
-  RightHand: {fileID: 3468982464213283971}
+  LeftHand: {fileID: 752089353315546107}
+  RightHand: {fileID: 2837222685369851332}
   ColourObjects:
   - {fileID: 0}
   - {fileID: 0}

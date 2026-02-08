@@ -9464,8 +9464,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 486174588}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.2673364, y: 12.137523, z: -3.8784842}
+  m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -6.157, y: 12.137523, z: -2.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9476,7 +9476,7 @@ Transform:
   - {fileID: 2062323224}
   - {fileID: 1544899013}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &504425546
 GameObject:
   m_ObjectHideFlags: 0
@@ -14297,8 +14297,8 @@ Transform:
   m_GameObject: {fileID: 809098655}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.423, y: 0.034, z: -1.728}
-  m_LocalScale: {x: 0.13762388, y: 0.13692702, z: 0.7217075}
+  m_LocalPosition: {x: -0.423, y: 0.034, z: -1.5948}
+  m_LocalScale: {x: 0.13762388, y: 0.13692702, z: 0.4553253}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 486174589}
@@ -18468,8 +18468,8 @@ Transform:
   m_GameObject: {fileID: 1184168245}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.008, y: 0.034, z: -1.728}
-  m_LocalScale: {x: 0.13762388, y: 0.13692702, z: 0.7217075}
+  m_LocalPosition: {x: 0.008, y: 0.034, z: -1.592}
+  m_LocalScale: {x: 0.13762388, y: 0.13692702, z: 0.4496238}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 486174589}
@@ -23777,8 +23777,8 @@ Transform:
   m_GameObject: {fileID: 1477860294}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.23336363, y: 0.0336771, z: -1.7999158}
-  m_LocalScale: {x: 1.0698, y: 0.7545764, z: 0.72134686}
+  m_LocalPosition: {x: -0.2334, y: 0.0336771, z: -1.6274}
+  m_LocalScale: {x: 1.0698, y: 0.7545764, z: 0.37632668}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 486174589}
@@ -33085,8 +33085,8 @@ Transform:
   m_GameObject: {fileID: 2138561666}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.22866344, y: 0.052476883, z: -1.7875156}
-  m_LocalScale: {x: 0.9705492, y: 0.6468817, z: 0.72134686}
+  m_LocalPosition: {x: -0.2287, y: 0.052476883, z: -1.6194}
+  m_LocalScale: {x: 0.9705492, y: 0.6468817, z: 0.38505495}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 486174589}
@@ -39415,12 +39415,14 @@ MonoBehaviour:
     mr.oblivious
     = dev
 
+    bradly = dev
+
     frosted = modeler
 
     smexysnowy = modeler
 
-    grapecaprisun = logo
-    creator
+    grapecaprisun
+    = logo creator
 
     vivedvr = logo creator
 
@@ -39530,7 +39532,7 @@ MonoBehaviour:
   RightHand: {fileID: 7726900827598851292}
   Colour: {r: 0, g: 0, b: 0, a: 0}
   DefaultQueue: Default
-  DefaultRoomLimit: 16
+  DefaultRoomLimit: 9
   ConnectOnAwake: 1
   JoinRoomOnConnect: 0
 --- !u!1 &4041120851121118378
