@@ -317,7 +317,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6068051308325917018}
-  - component: {fileID: 2494802131252050588}
   m_Layer: 0
   m_Name: Upper Forearm L
   m_TagString: Untagged
@@ -342,40 +341,6 @@ Transform:
   - {fileID: 5768742637986287233}
   m_Father: {fileID: 8536630789960745866}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2494802131252050588
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 557973624000847071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c72dba0c975726b40b05ee1d04ef358c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ArmPlus.ArmsPlus
-  armChain:
-    bones:
-    - {fileID: 6068051308325917018}
-    - {fileID: 6642720731922131193}
-    - {fileID: 7636777677421045823}
-    target: {fileID: 7450182763230599848}
-    pole: {fileID: 8057678198584410387}
-    enableIK: 1
-    iterations: 10
-    amount: 0.01
-    ikWeight: 1
-    smoothSpeed: 0.557
-    snapBackStrength: 1
-    useTargetRotation: 1
-    strechy: 0
-    strechMultiplier: 1
-  showGizmos: 1
-  chainColor: {r: 0, g: 0, b: 1, a: 1}
-  targetColor: {r: 1, g: 0, b: 0, a: 1}
-  gizmoSize: 0.05
-  tL: 0.6788597
-  useNewtonStyle: 0
 --- !u!1 &918525823352012128
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,37 +667,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &1394665834298041515
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8057678198584410387}
-  m_Layer: 0
-  m_Name: L_Pole
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8057678198584410387
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1394665834298041515}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.70611024, y: -0.70611, z: -0.037530817, w: -0.037530564}
-  m_LocalPosition: {x: 0.01604, y: -0.01485, z: -0.01683}
-  m_LocalScale: {x: 0.00765986, y: 0.0076598627, z: 0.007659863}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7423876665286460838}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1436329680159266765
 GameObject:
   m_ObjectHideFlags: 0
@@ -1446,6 +1380,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6637305633515747371}
   - component: {fileID: 8533966183361853085}
+  - component: {fileID: 9085887264262100207}
   m_Layer: 0
   m_Name: Hand R
   m_TagString: HandTag
@@ -1515,6 +1450,24 @@ MonoBehaviour:
   editMode: 0
   saveOpenRotations: 0
   saveCurlRotations: 0
+--- !u!114 &9085887264262100207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3259223367860183530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a3869c9bda57744fab00e87740a06e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DitzelGames.FastIK.FastIKFabric
+  ChainLength: 2
+  Target: {fileID: 2837222685369851332}
+  Pole: {fileID: 7423876665286460838}
+  Iterations: 10
+  Delta: 0.001
+  SnapBackStrength: 1
 --- !u!1 &3293295093033218467
 GameObject:
   m_ObjectHideFlags: 0
@@ -1610,37 +1563,6 @@ Transform:
   - {fileID: 6656069275511001013}
   m_Father: {fileID: 7404702250886733165}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3358608772227661309
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7450182763230599848}
-  m_Layer: 0
-  m_Name: L_Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7450182763230599848
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3358608772227661309}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.52036893, y: 0.47898835, z: 0.492214, w: 0.50745624}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 752089353315546107}
-  m_LocalEulerAnglesHint: {x: 176.755, y: -89.975006, z: -88.50101}
 --- !u!1 &3527243831085233795
 GameObject:
   m_ObjectHideFlags: 0
@@ -1779,6 +1701,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7636777677421045823}
   - component: {fileID: 3550630038609494750}
+  - component: {fileID: 2021408666400118872}
   m_Layer: 0
   m_Name: Left Hand
   m_TagString: HandTag
@@ -1848,6 +1771,24 @@ MonoBehaviour:
   editMode: 0
   saveOpenRotations: 0
   saveCurlRotations: 0
+--- !u!114 &2021408666400118872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4095794937874643435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a3869c9bda57744fab00e87740a06e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DitzelGames.FastIK.FastIKFabric
+  ChainLength: 2
+  Target: {fileID: 752089353315546107}
+  Pole: {fileID: 6068051308325917018}
+  Iterations: 10
+  Delta: 0.001
+  SnapBackStrength: 1
 --- !u!1 &4234870702540968680
 GameObject:
   m_ObjectHideFlags: 0
@@ -2129,7 +2070,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7910137498194017359}
-  - {fileID: 7450182763230599848}
   m_Father: {fileID: 5550819733793230863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5135070864496272122
@@ -2223,6 +2163,7 @@ GameObject:
   - component: {fileID: 8565406117360176805}
   - component: {fileID: 898607237399874742}
   - component: {fileID: 7780029385335637883}
+  - component: {fileID: 7671831042384204172}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2319,6 +2260,20 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &7671831042384204172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5550819733793230860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da034121393e8ff4a8e5ac1b878e9a02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNameManager
+  NameText: {fileID: 1060129648280679432}
+  DefaultNamePrefix: Monke
 --- !u!1 &5882641407514425074
 GameObject:
   m_ObjectHideFlags: 0
@@ -3171,37 +3126,6 @@ Transform:
   - {fileID: 4094472707901096483}
   m_Father: {fileID: 6642720731922131193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7617239894579669820
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1716415214699379834}
-  m_Layer: 0
-  m_Name: R_Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1716415214699379834
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7617239894579669820}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.48660073, y: -0.51419044, z: -0.50160635, w: 0.49721125}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2837222685369851332}
-  m_LocalEulerAnglesHint: {x: -1.831, y: -90.134, z: -88.669}
 --- !u!1 &7638886156417823148
 GameObject:
   m_ObjectHideFlags: 0
@@ -3276,7 +3200,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7423876665286460838}
-  - component: {fileID: 871892947901508825}
   m_Layer: 0
   m_Name: Upper Forearm R
   m_TagString: Untagged
@@ -3299,44 +3222,8 @@ Transform:
   m_Children:
   - {fileID: 7473501764694412213}
   - {fileID: 6148709917628644069}
-  - {fileID: 360657645773140984}
-  - {fileID: 8057678198584410387}
   m_Father: {fileID: 2892254690062379493}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &871892947901508825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8027005952038949788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c72dba0c975726b40b05ee1d04ef358c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ArmPlus.ArmsPlus
-  armChain:
-    bones:
-    - {fileID: 7423876665286460838}
-    - {fileID: 6148709917628644069}
-    - {fileID: 6637305633515747371}
-    target: {fileID: 1716415214699379834}
-    pole: {fileID: 360657645773140984}
-    enableIK: 1
-    iterations: 10
-    amount: 0.01
-    ikWeight: 1
-    smoothSpeed: 0.557
-    snapBackStrength: 1
-    useTargetRotation: 1
-    strechy: 0
-    strechMultiplier: 1
-  showGizmos: 1
-  chainColor: {r: 0, g: 0, b: 1, a: 1}
-  targetColor: {r: 1, g: 0, b: 0, a: 1}
-  gizmoSize: 0.05
-  tL: 0.68621904
-  useNewtonStyle: 0
 --- !u!1 &8190205331747425634
 GameObject:
   m_ObjectHideFlags: 0
@@ -3431,7 +3318,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5897067227479209265}
-  - {fileID: 1716415214699379834}
   m_Father: {fileID: 5550819733793230863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6156761605877828840
@@ -3450,37 +3336,6 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
---- !u!1 &8300482682143505272
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 360657645773140984}
-  m_Layer: 0
-  m_Name: R_Pole
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &360657645773140984
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300482682143505272}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.70611024, y: -0.70611, z: -0.037530817, w: -0.037530564}
-  m_LocalPosition: {x: 0.01604, y: 0.01221, z: -0.01395}
-  m_LocalScale: {x: 0.00765986, y: 0.0076598627, z: 0.007659863}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7423876665286460838}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8321570792123722342
 GameObject:
   m_ObjectHideFlags: 0
