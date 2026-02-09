@@ -374,7 +374,7 @@ MonoBehaviour:
   chainColor: {r: 0, g: 0, b: 1, a: 1}
   targetColor: {r: 1, g: 0, b: 0, a: 1}
   gizmoSize: 0.05
-  tL: 0
+  tL: 0.6788597
   useNewtonStyle: 0
 --- !u!1 &918525823352012128
 GameObject:
@@ -1135,7 +1135,7 @@ Transform:
   m_GameObject: {fileID: 2573417464668843975}
   serializedVersion: 2
   m_LocalRotation: {x: 0.00000018477634, y: -0.000000031786485, z: -0.00000007549792, w: 1}
-  m_LocalPosition: {x: 3.7133293, y: 1.0938721, z: 0.18330953}
+  m_LocalPosition: {x: 4.61, y: 1.09, z: 0.18}
   m_LocalScale: {x: 7.8083806, y: 7.8083806, z: 12.170591}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2266,10 +2266,7 @@ MonoBehaviour:
   LeftHand: {fileID: 752089353315546107}
   RightHand: {fileID: 2837222685369851332}
   ColourObjects:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 3580308644072524044}
   CosmeticSlots:
   - SlotName: Head
     Object: {fileID: 182381451631106285}
@@ -2317,6 +2314,8 @@ MonoBehaviour:
   - {fileID: 7034750584448290677}
   - {fileID: 5135070864496272122}
   - {fileID: 6156761605877828840}
+  - {fileID: 3550630038609494750}
+  - {fileID: 8533966183361853085}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -3336,7 +3335,7 @@ MonoBehaviour:
   chainColor: {r: 0, g: 0, b: 1, a: 1}
   targetColor: {r: 1, g: 0, b: 0, a: 1}
   gizmoSize: 0.05
-  tL: 0
+  tL: 0.68621904
   useNewtonStyle: 0
 --- !u!1 &8190205331747425634
 GameObject:
