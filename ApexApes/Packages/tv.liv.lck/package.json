@@ -1,7 +1,7 @@
 {
   "name": "tv.liv.lck",
   "version": "1.4.3",
-  "displayName": "LIV Creator Kit",
+  "displayName": "CCL Games LIV",
   "description": "LIV Creator Kit.",
   "unity": "2022.3",
   "unityRelease": "15f1",
@@ -12,9 +12,9 @@
     "quest"
   ],
   "author": {
-    "name": "LIV Inc",
-    "email": "techteam@liv.tv",
-    "url": "https://docs.liv.tv/"
+    "name": "CCL Games",
+    "url": "https://docs.liv.tv/",
+    "email": "techteam@liv.tv"
   },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.2",

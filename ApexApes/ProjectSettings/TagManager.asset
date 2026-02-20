@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - HandTag
+  - Grass
+  - Wood
+  - Stone
+  - Metal
   layers:
   - Default
   - TransparentFX
