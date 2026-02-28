@@ -2259,6 +2259,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7190960678257063546}
   - component: {fileID: 3580308644072524044}
+  - component: {fileID: 1818807601492611834}
   m_Layer: 0
   m_Name: Cube.001
   m_TagString: Untagged
@@ -2306,8 +2307,8 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9c3a589d6b7a5c442a1efd8e6467af0b, type: 2}
   - {fileID: 2100000, guid: 95acac50450e8864f9317e383c1c0e49, type: 2}
+  - {fileID: 2100000, guid: 9c3a589d6b7a5c442a1efd8e6467af0b, type: 2}
   - {fileID: 2100000, guid: e3095b6a502c56d43be8d278e3e0c870, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -2375,6 +2376,21 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00006281957, y: 0.009489002, z: -0.00016756053}
     m_Extent: {x: 0.03374203, y: 0.010118477, z: 0.005090262}
   m_DirtyAABB: 0
+--- !u!114 &1818807601492611834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2573417464668843975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4afa15bb03eb8a341bf2ce7ce24eb8be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MaterialMapper
+  bodyFur: {fileID: 2100000, guid: 95acac50450e8864f9317e383c1c0e49, type: 2}
+  chestFur: {fileID: 2100000, guid: 9c3a589d6b7a5c442a1efd8e6467af0b, type: 2}
+  faceTexture: {fileID: 2100000, guid: e3095b6a502c56d43be8d278e3e0c870, type: 2}
 --- !u!1 &2594838488421437922
 GameObject:
   m_ObjectHideFlags: 0
@@ -4403,7 +4419,8 @@ MonoBehaviour:
   Body: {fileID: 5062317285965503532}
   LeftHand: {fileID: 752089353315546107}
   RightHand: {fileID: 2837222685369851332}
-  ColourObjects: []
+  ColourObjects:
+  - {fileID: 3580308644072524044}
   CosmeticSlots:
   - SlotName: Head
     Object: {fileID: 182381451631106285}
