@@ -155,7 +155,7 @@
             slider.onValueChanged.AddListener(action);
         }
 
-        public static void SetSingleOnValueChangedCallback(this MicrophoneSelector selector, UnityAction<MicType, DeviceInfo> action)
+        public static void SetSingleOnValueChangedCallback(this MicrophoneSelector selector, UnityAction<Recorder.MicType, DeviceInfo> action)
         {
             selector.onValueChanged.RemoveAllListeners();
             selector.onValueChanged.AddListener(action);

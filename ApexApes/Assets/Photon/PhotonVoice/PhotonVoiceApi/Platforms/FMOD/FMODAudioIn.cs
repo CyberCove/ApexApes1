@@ -39,12 +39,16 @@ namespace Photon.Voice.FMOD
             else
             {
                 Error = "only float and short buffers are supported: " + typeof(T);
-                logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                logger.LogError(LOG_PREFIX + Error);
                 return;
             }
 
             try
             {
+                if (device == -1) // default device
+                {
+                    device = 0;
+                }
                 FMODLib.RESULT res;
 
                 this.coreSystem = coreSystem;
@@ -59,7 +63,7 @@ namespace Photon.Voice.FMOD
                 if (res != FMODLib.RESULT.OK)
                 {
                     Error = "failed to getRecordDriverInfo: " + res;
-                    logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                    logger.LogError(LOG_PREFIX + Error);
                     return;
                 }
 
@@ -77,16 +81,16 @@ namespace Photon.Voice.FMOD
                 if (res != FMODLib.RESULT.OK)
                 {
                     Error = "failed to createSound: " + res;
-                    logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                    logger.LogError(LOG_PREFIX + Error);
                     return;
                 }
 
-                res = this.coreSystem.recordStart(device, sound, true);
+                res = this.coreSystem.recordStart(0, sound, true);
 
                 if (res != FMODLib.RESULT.OK)
                 {
                     Error = "failed to startrecord: " + res;
-                    logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                    logger.LogError(LOG_PREFIX + Error);
                     return;
                 }
                 else
@@ -97,7 +101,7 @@ namespace Photon.Voice.FMOD
                 //test play
                 //this.coreSystem.playSound(sound, channelGroup, false, out channel);
 
-                logger.Log(LogLevel.Info, "[PV] [FMOD] Mic: microphone '{0}' initialized, frequency = {1}, channels = {2}.", device, samplingRate, channels);
+                logger.LogInfo("[PV] [FMOD] Mic: microphone '{0}' initialized, frequency = {1}, channels = {2}.", device, samplingRate, channels);
             }
             catch (Exception e)
             {
@@ -106,7 +110,7 @@ namespace Photon.Voice.FMOD
                 {
                     Error = "Exception in [FMOD] Mic constructor";
                 }
-                logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                logger.LogError(LOG_PREFIX + Error);
             }
         }
 
@@ -131,11 +135,11 @@ namespace Photon.Voice.FMOD
                 return false;
             }
             uint micPos;
-            FMODLib.RESULT res = this.coreSystem.getRecordPosition(device, out micPos);
+            FMODLib.RESULT res = this.coreSystem.getRecordPosition(0, out micPos);
             if (res != FMODLib.RESULT.OK)
             {
                 Error = "failed to getRecordPosition: " + res;
-                logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                logger.LogError(LOG_PREFIX + Error);
                 return false;
             }
 
@@ -157,7 +161,7 @@ namespace Photon.Voice.FMOD
                 if (res != FMODLib.RESULT.OK)
                 {
                     Error = "failed to lock sound buffer: " + res;
-                    logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                    logger.LogError(LOG_PREFIX + Error);
                     return false;
                 }
 
@@ -184,7 +188,7 @@ namespace Photon.Voice.FMOD
                 if (res != FMODLib.RESULT.OK)
                 {
                     Error = "failed to unlock sound buffer: " + res;
-                    logger.Log(LogLevel.Error, LOG_PREFIX + Error);
+                    logger.LogError(LOG_PREFIX + Error);
                     return false;
                 }
 

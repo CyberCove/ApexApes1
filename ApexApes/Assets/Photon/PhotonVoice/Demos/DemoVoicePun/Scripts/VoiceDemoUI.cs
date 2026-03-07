@@ -11,7 +11,6 @@
 #if PUN_2_OR_NEWER
 
 using System;
-using Photon.Realtime;
 using Photon.Voice.PUN;
 
 #pragma warning disable 0649 // Field is never assigned to, and will always have its default value
@@ -114,7 +113,6 @@ namespace ExitGames.Demos.DemoPunVoice
         private void Awake()
         {
             this.punVoiceClient = PunVoiceClient.Instance;
-            Debug.LogWarning("VoiceDemoUI selected a punVoiceClient.Instance", this.punVoiceClient);
         }
 
         private void OnDestroy()
@@ -175,6 +173,10 @@ namespace ExitGames.Demos.DemoPunVoice
                     case "AutoConnectAndJoin":
                         toggle.isOn = this.punVoiceClient.AutoConnectAndJoin;
                         break;
+
+                    case "AutoLeaveAndDisconnect":
+                        toggle.isOn = this.punVoiceClient.AutoLeaveAndDisconnect;
+                        break;
                 }
             }
         }
@@ -220,6 +222,9 @@ namespace ExitGames.Demos.DemoPunVoice
                 case "AutoConnectAndJoin":
                     this.punVoiceClient.AutoConnectAndJoin = toggle.isOn;
                     break;
+                case "AutoLeaveAndDisconnect":
+                    this.punVoiceClient.AutoLeaveAndDisconnect = toggle.isOn;
+                    break;
             }
         }
 
@@ -235,7 +240,6 @@ namespace ExitGames.Demos.DemoPunVoice
             CharacterInstantiation.CharacterInstantiated += this.CharacterInstantiation_CharacterInstantiated;
             this.punVoiceClient.Client.StateChanged += this.VoiceClientStateChanged;
             PhotonNetwork.NetworkingClient.StateChanged += this.PunClientStateChanged;
-
 
             this.canvas = this.GetComponentInChildren<Canvas>();
             if (this.punSwitch != null)
@@ -266,9 +270,9 @@ namespace ExitGames.Demos.DemoPunVoice
             }
             if (this.devicesInfoText != null)
             {
-                using (var unityMicEnum = new Photon.Voice.Unity.AudioInEnumerator(this.punVoiceClient.Logger))
+                using (var unityMicEnum = new Photon.Voice.Unity.AudioInEnumerator(this.punVoiceClient.Client))
                 {
-                    using (var photonMicEnum = Photon.Voice.Platform.CreateAudioInEnumerator(this.punVoiceClient.Logger))
+                    using (var photonMicEnum = Photon.Voice.Platform.CreateAudioInEnumerator(this.punVoiceClient.Client))
                     {
                         if (unityMicEnum.Count() + photonMicEnum.Count() == 0)
                         {
@@ -284,11 +288,6 @@ namespace ExitGames.Demos.DemoPunVoice
                     }
                 }
             }
-
-
-            this.VoiceClientStateChanged(ClientState.PeerCreated, this.punVoiceClient.ClientState);
-            this.PunClientStateChanged(ClientState.PeerCreated, PhotonNetwork.NetworkingClient.State);
-
 
 #if !UNITY_EDITOR && UNITY_PS4
             UserProfiles.LocalUsers localUsers = new UserProfiles.LocalUsers();

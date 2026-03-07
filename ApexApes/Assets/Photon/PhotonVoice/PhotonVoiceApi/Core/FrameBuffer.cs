@@ -156,8 +156,6 @@ namespace Photon.Voice
         public FrameFlags Flags { get; }
         public byte FrameNum { get; }
         public bool IsFEC => (Flags & FrameFlags.FEC) != 0;
-        public bool IsConfig => (Flags & FrameFlags.Config) != 0;
-        public bool IsKeyframe => (Flags & FrameFlags.KeyFrame) != 0;
 
         public override string ToString()
         {
@@ -167,9 +165,8 @@ namespace Photon.Voice
             }
             else
             {
-                var frag = Flags & FrameFlags.MaskFrag;
-                var part = Flags & FrameFlags.MaskPart;
-                return "#" + FrameNum + " " + part + " " + frag + (frag == FrameFlags.FragNotEnd ? " c#" + array[offset + count - 1] : "") + (IsFEC ? " FEC" : "") + " r#" + refCnt;
+                var frag = (FrameFlags)(Flags & FrameFlags.MaskFrag);
+                return "#" + FrameNum + " " + frag + (frag == FrameFlags.FragNotEnd ? " c#" + array[offset + count - 1] : "") + (IsFEC ? " FEC" : "") + " r#" + refCnt;
             }
         }
     }

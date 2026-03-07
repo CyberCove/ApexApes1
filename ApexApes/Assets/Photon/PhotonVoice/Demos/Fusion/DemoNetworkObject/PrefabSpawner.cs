@@ -84,11 +84,7 @@ namespace Photon.Voice.Fusion.Demo
             }
         }
 
-#if FUSION2
-        void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-#else
         void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner)
-#endif
         {
             if (this.debugLogs)
             {
@@ -124,6 +120,9 @@ namespace Photon.Voice.Fusion.Demo
         {
         }
 
+        void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
+        {
+        }
 
         void INetworkRunnerCallbacks.OnSceneLoadDone(NetworkRunner runner)
         {
@@ -132,29 +131,8 @@ namespace Photon.Voice.Fusion.Demo
         void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner)
         {
         }
-#if FUSION2
 
-        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-        {
-        }
-
-        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-        {
-        }
-
-        void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey reliableKey, ArraySegment<byte> data)
-        {
-        }
-
-        void INetworkRunnerCallbacks.OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey reliableKey, float progress)
-        {
-        }
-#else
-        void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
-        {
-        }
-#endif
-        #endregion
+#endregion
 
         private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
         {

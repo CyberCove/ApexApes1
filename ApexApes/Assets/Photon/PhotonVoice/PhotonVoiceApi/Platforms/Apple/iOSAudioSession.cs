@@ -331,7 +331,7 @@
         public static AudioSessionParameters Game = new AudioSessionParameters()
         {
             Category = AudioSessionCategory.PlayAndRecord,
-            Mode = AudioSessionMode.VoiceChat,
+            Mode = AudioSessionMode.Default,
             CategoryOptions = new AudioSessionCategoryOption[] { AudioSessionCategoryOption.DefaultToSpeaker, AudioSessionCategoryOption.AllowBluetooth }
         };
         public static AudioSessionParameters VoIP = new AudioSessionParameters()

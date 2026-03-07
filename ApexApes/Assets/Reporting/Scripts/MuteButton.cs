@@ -1,56 +1,39 @@
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+
 public class MuteButton : MonoBehaviour
 {
-    [SerializeField] public int ButtonNumber;
-    [SerializeField] public LeaderBoard LB;
-    [SerializeField] public string HandTag = "HandTag";
-
-    private bool Muted = false;
+    public int ButtonNumber;
+    public LeaderBoard LB;
+    public string HandTag = "HandTag";
     public Material MutedMaterial;
     private Material UnMutedMaterial;
     private Renderer rend;
+    private bool muted;
 
-    private Player MutedUser;
-
-    private void Start()
+    void Start()
     {
         rend = GetComponent<Renderer>();
         UnMutedMaterial = rend.material;
     }
 
-    private void Update()
+    void OnTriggerEnter(Collider other)
     {
-        if (ButtonNumber > 0 && ButtonNumber <= PhotonNetwork.PlayerList.Length)
+        if (other.CompareTag(HandTag))
         {
-            if (PhotonNetwork.PlayerList[ButtonNumber - 1] != MutedUser && Muted)
-            {
-                Muted = false;
-                rend.material = UnMutedMaterial;
-            }
+            if (ButtonNumber <= 0 || ButtonNumber > PhotonNetwork.PlayerList.Length) return;
+
+            LB.MutePress(ButtonNumber);
+
+            muted = !muted;
+            rend.material = muted ? MutedMaterial : UnMutedMaterial;
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerExit(Collider other)
     {
-        if (ButtonNumber > 0 && ButtonNumber <= PhotonNetwork.PlayerList.Length)
-        {
-            if (other.CompareTag(HandTag))
-            {
-                LB.MutePress(ButtonNumber);
-
-                Muted = !Muted;
-                MutedUser = PhotonNetwork.PlayerList[ButtonNumber - 1];
-                if (Muted)
-                {
-                    rend.material = MutedMaterial;
-                }
-                else
-                {
-                    rend.material = UnMutedMaterial;
-                }
-            }
-        }
+        if (other.CompareTag(HandTag))
+            rend.material = UnMutedMaterial;
     }
 }

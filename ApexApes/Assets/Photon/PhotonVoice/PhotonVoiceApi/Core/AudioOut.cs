@@ -70,21 +70,11 @@ namespace Photon.Voice
             public int Low; // ms: Audio player initilizes the delay with this value on Start and after flush and targets it during corrections
             public int High; // ms: Audio player tries to keep the delay below this value
             public int Max; // ms: Audio player guarantees that the delay never exceeds this value by dropping frames
-            public int Delay // ms: simplified delay API
-            {
-                get => Low;
-                set
-                {
-                    Low = value;
-                    High = value; // rely on automatic tolerance value
-                    Max = Default.Max;
-                }
-            }
             public int SpeedUpPerc; // playback speed-up to catch up the stream
-        }
 #if PHOTON_VOICE_SOUND_TOUCH_ENABLE
             public bool TempoChangeHQ;
 #endif
+        }
     }
 
     // Consumes audio frames via Push(), optionally resizes and writes (OutWrite) them to the output to keep constant delay
@@ -113,6 +103,7 @@ namespace Photon.Voice
         // stream positions in samples modulo bufferSamples
         private int writeSamplePos; // updated and read only in processFrame() (called from Service() or Push())
         private int clearSamplePos; // updated only in Service()
+        private int playSamplePos; // updated only in Service()
 
         private PlayDelayConfig playDelayConfig;
         private int channels;
@@ -162,7 +153,7 @@ namespace Photon.Voice
             {
                 if (this.started)
                 {
-                    int d = this.writeSamplePos - (int)(OutPos % this.bufferSamples);
+                    int d = this.writeSamplePos - this.playSamplePos;
                     // detect ring buffer wrapping and convert to ms
                     return (d > bufferSamplesHalf ? d - bufferSamples : d < -bufferSamplesHalf ? d + bufferSamples : d) *1000 / frequency;
                 }
@@ -216,9 +207,9 @@ namespace Photon.Voice
             this.maxDelaySamples = this.upperTargetDelaySamples + (playDelayConfig.Max - playDelayConfig.High) * frequency / 1000;
 
             this.bufferSamples = 4 * this.maxDelaySamples; // make sure we have enough space to detect wrapped positions order in the buffer
-            if (this.bufferSamples < 2 * frequency)
+            if (this.bufferSamples < frameSamples)
             {
-                this.bufferSamples = 2 * frequency; // at least 2 sec.
+                this.bufferSamples = frameSamples; // at least 1 sec.
             }
             this.bufferSamplesHalf = bufferSamples / 2;
             this.frameSamples = frameSamples;
@@ -226,9 +217,9 @@ namespace Photon.Voice
 
             this.writeSamplePos = this.targetDelaySamples;
 
-            if (this.framePool == null || this.framePool.Info != this.frameSize)
+            if (this.framePool.Info != this.frameSize)
             {
-                this.framePool = new ArrayPool<T>(FRAME_POOL_CAPACITY, "AudioOutDelayControl", this.frameSize);
+                this.framePool.Init(this.frameSize);
             }
 
             this.zeroFrame = new T[this.frameSize];
@@ -246,7 +237,7 @@ namespace Photon.Voice
                 }
                 catch (DllNotFoundException e)
                 {
-                    logger.Log(LogLevel.Error, "{0} SoundTouch library not found, disabling HQ tempo mode: {1}", this.logPrefix, e);
+                    logger.LogError("{0} SoundTouch library not found, disabling HQ tempo mode: {1}", this.logPrefix, e);
                     tempoChangeHQ = false;
                 }
             }
@@ -261,17 +252,16 @@ namespace Photon.Voice
             OutCreate(frequency, channels, bufferSamples);
             OutStart();
             this.started = true;
-            this.logger.Log(LogLevel.Info, "{0} Start: {1} bs={2} ch={3} f={4} tds={5} utds={6} mds={7} speed={8} tempo={9}", this.logPrefix, sizeofT == 2 ? "short" : "float", bufferSamples, channels, frequency, targetDelaySamples, upperTargetDelaySamples, maxDelaySamples, playDelayConfig.SpeedUpPerc, tempoChangeHQ ? "HQ" : "LQ");
+            this.logger.LogInfo("{0} Start: {1} bs={2} ch={3} f={4} tds={5} utds={6} mds={7} speed={8} tempo={9}", this.logPrefix, sizeofT == 2 ? "short" : "float", bufferSamples, channels, frequency, targetDelaySamples, upperTargetDelaySamples, maxDelaySamples, playDelayConfig.SpeedUpPerc, tempoChangeHQ ? "HQ" : "LQ");
         }
 
         ConcurrentQueue<T[]> frameQueue = new ConcurrentQueue<T[]>();
         public const int FRAME_POOL_CAPACITY = 50;
-        ArrayPool<T> framePool;
+        PrimitiveArrayPool<T> framePool = new PrimitiveArrayPool<T>(FRAME_POOL_CAPACITY, "AudioOutDelayControl");
         bool catchingUp = false;
 
-        void processFrame(T[] frame)
+        void processFrame(T[] frame, int playSamplePos)
         {
-            int playSamplePos = (int)(OutPos % this.bufferSamples);
             int d = this.writeSamplePos - playSamplePos;
             // detect ring buffer wrapping
             int lagSamples = d > bufferSamplesHalf ? d - bufferSamples : d < -bufferSamplesHalf ? d + bufferSamples : d;
@@ -282,7 +272,7 @@ namespace Photon.Voice
                 {
                     if (this.debugInfo)
                     {
-                        logger.Log(LogLevel.Debug, "{0} overrun {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                        this.logger.LogDebug("{0} overrun {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                     }
                     this.writeSamplePos = (playSamplePos + maxDelaySamples) % this.bufferSamples;
                     lagSamples = maxDelaySamples;
@@ -291,7 +281,7 @@ namespace Photon.Voice
                 {
                     if (this.debugInfo)
                     {
-                        logger.Log(LogLevel.Debug, "{0} underrun {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                        this.logger.LogDebug("{0} underrun {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                     }
                     this.writeSamplePos = (playSamplePos + targetDelaySamples) % this.bufferSamples;
                     lagSamples = targetDelaySamples;
@@ -303,7 +293,7 @@ namespace Photon.Voice
                 this.flushed = true;
                 if (this.debugInfo)
                 {
-                    logger.Log(LogLevel.Debug, "{0} stream flush pause {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                    this.logger.LogDebug("{0} stream flush pause {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                 }
                 if (catchingUp)
                 {
@@ -317,7 +307,7 @@ namespace Photon.Voice
                     catchingUp = false;
                     if (this.debugInfo)
                     {
-                        logger.Log(LogLevel.Debug, "{0} stream sync reset {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                        this.logger.LogDebug("{0} stream sync reset {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                     }
                 }
 
@@ -332,7 +322,7 @@ return;
                     this.flushed = false;
                     if (this.debugInfo)
                     {
-                        logger.Log(LogLevel.Debug, "{0} stream unpause {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                        this.logger.LogDebug("{0} stream unpause {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                     }
                 }
             }
@@ -355,7 +345,7 @@ return;
                 catchingUp = true;
                 if (this.debugInfo)
                 {
-                    logger.Log(LogLevel.Debug, "{0} stream sync started {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                    this.logger.LogDebug("{0} stream sync started {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                 }
             }
 
@@ -382,7 +372,7 @@ return;
                 catchingUp = false;
                 if (this.debugInfo)
                 {
-                    logger.Log(LogLevel.Debug, "{0} stream sync finished {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
+                    this.logger.LogDebug("{0} stream sync finished {1} {2} {3} {4} {5}", this.logPrefix, upperTargetDelaySamples, lagSamples, playSamplePos, this.writeSamplePos, playSamplePos + targetDelaySamples);
                 }
             }
 
@@ -426,26 +416,30 @@ return;
         {
             if (this.started)
             {
+                // cache play position
+                // it's updated here only
+                // in theory we could benefit from getting more up-to-date value in each processFrame() call but this does not happen at least with UnityAudioOut which sticks all calls to Update()
+                this.playSamplePos = (int)(OutPos % this.bufferSamples);
+
                 if (processInService)
                 {
                     while (frameQueue.TryDequeue(out T[] frame))
                     {
-                        processFrame(frame);
+                        processFrame(frame, this.playSamplePos);
                         if (frame == null)
                         {
                             break;  // flush signalled
                         }
-                        framePool.Free(frame, frame.Length);
+                        framePool.Release(frame, frame.Length);
                     }
                 }
 
-                int playSamplePos = (int)(OutPos % this.bufferSamples);
-                if (this.clearSamplePos > playSamplePos)
+                if (this.clearSamplePos > this.playSamplePos)
                 {
                     this.clearSamplePos -= this.bufferSamples;
                 }
                 // clear played back buffer segment
-                for (; this.clearSamplePos + this.frameSamples < playSamplePos; this.clearSamplePos += this.frameSamples)
+                for (; this.clearSamplePos + this.frameSamples < this.playSamplePos; this.clearSamplePos += this.frameSamples)
                 {
                     int o = (int)(this.clearSamplePos % this.bufferSamples);
                     if (o < 0) o += this.bufferSamples;
@@ -500,19 +494,19 @@ return;
 
             if (frame.Length != this.frameSize)
             {
-                logger.Log(LogLevel.Error, "{0} audio frames are not of size: {1} != {2}", this.logPrefix, frame.Length, this.frameSize);
+                logger.LogError("{0} audio frames are not of size: {1} != {2}", this.logPrefix, frame.Length, this.frameSize);
                 return;
             }
 
             if (processInService)
             {
-                T[] b = framePool.New();
+                T[] b = framePool.AcquireOrCreate();
                 Buffer.BlockCopy(frame, 0, b, 0, frame.Length * sizeofT);
                 this.frameQueue.Enqueue(b);
             }
             else
             {
-                processFrame(frame);
+                processFrame(frame, this.playSamplePos);
             }
 
             lastPushTime = Environment.TickCount;
@@ -526,7 +520,7 @@ return;
             }
             else
             {
-                processFrame(null);
+                processFrame(null, this.playSamplePos);
             }
         }
 

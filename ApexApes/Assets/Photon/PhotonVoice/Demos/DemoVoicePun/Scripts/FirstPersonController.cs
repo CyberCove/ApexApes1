@@ -24,7 +24,7 @@ namespace ExitGames.Demos.DemoPunVoice
 
         public Vector3 Velocity
         {
-            get { return this.rigidBody.linearVelocity; }
+            get { return this.rigidBody.velocity; }
         }
 
         protected override void SetCamera()
@@ -40,7 +40,7 @@ namespace ExitGames.Demos.DemoPunVoice
             desiredMove.x = desiredMove.x * this.speed;
             desiredMove.z = desiredMove.z * this.speed;
             desiredMove.y = 0;
-            this.rigidBody.linearVelocity = desiredMove;
+            this.rigidBody.velocity = desiredMove;
         }
 
         private void Update()
@@ -55,7 +55,7 @@ namespace ExitGames.Demos.DemoPunVoice
             this.mouseLook.LookRotation(this.transform, this.camTrans);
             // Rotate the rigidbody velocity to match the new direction that the character is looking
             this.velRotation = Quaternion.AngleAxis(this.transform.eulerAngles.y - this.oldYRotation, Vector3.up);
-            this.rigidBody.linearVelocity = this.velRotation * this.rigidBody.linearVelocity;
+            this.rigidBody.velocity = this.velRotation * this.rigidBody.velocity;
         }
     }
 

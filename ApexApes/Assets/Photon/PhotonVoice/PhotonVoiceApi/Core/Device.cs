@@ -1,4 +1,4 @@
-﻿#if ((UNITY_IOS || UNITY_VISIONOS) && !UNITY_EDITOR) || __IOS__
+﻿#if (UNITY_IOS && !UNITY_EDITOR) || __IOS__
 #define DLL_IMPORT_INTERNAL
 #endif
 
@@ -89,7 +89,6 @@ namespace Photon.Voice
         {
             return d1.Equals(d2);
         }
-
         public static bool operator !=(DeviceInfo d1, DeviceInfo d2)
         {
             return !d1.Equals(d2);
@@ -100,7 +99,6 @@ namespace Photon.Voice
         {
             return base.Equals(obj);
         }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
@@ -126,51 +124,26 @@ namespace Photon.Voice
     {
         bool IsSupported { get; }
         void Refresh();
-        Action OnReady {set;}
         string Error { get; }
     }
 
     public abstract class DeviceEnumeratorBase : IDeviceEnumerator
     {
         protected List<DeviceInfo> devices = new List<DeviceInfo>();
-
         protected ILogger logger;
-
         public DeviceEnumeratorBase(ILogger logger)
         {
             this.logger = logger;
         }
-
         public virtual bool IsSupported => true;
-
         public virtual string Error { get; protected set; }
 
         public IEnumerator<DeviceInfo> GetEnumerator()
         {
-            return (devices == null ? System.Linq.Enumerable.Empty<DeviceInfo>() : devices).GetEnumerator();
+            return devices.GetEnumerator();
         }
 
         public abstract void Refresh();
-
-        // if the enum has already the list, return it as soon as the callback ist set
-        public Action OnReady
-        {
-            protected get
-            {
-                return onReady;
-            }
-            set
-            {
-                onReady = value;
-
-                if (devices != null && onReady != null)
-                {
-                    onReady();
-                }
-            }
-        }
-
-        private Action onReady;
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -187,13 +160,8 @@ namespace Photon.Voice
         {
             devices = new List<DeviceInfo>() { new DeviceInfo(deviceName) };
         }
-
         public override void Refresh()
         {
-            if (OnReady != null)
-            {
-                OnReady();
-            }
         }
 
         public override void Dispose()
@@ -213,10 +181,6 @@ namespace Photon.Voice
 
         public override void Refresh()
         {
-            if (OnReady != null)
-            {
-                OnReady();
-            }
         }
 
         public override string Error { get { return message; } }

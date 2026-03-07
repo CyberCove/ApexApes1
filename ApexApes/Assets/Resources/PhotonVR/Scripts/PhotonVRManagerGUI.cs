@@ -12,7 +12,6 @@ using UnityEditor;
 
 using Photon.Pun;
 
-
 namespace Photon.VR
 {
     [CustomEditor(typeof(PhotonVRManager))]
@@ -27,11 +26,6 @@ namespace Photon.VR
             GUILayout.Label(new GUIContent() { image = logo });
 
             PhotonVRManager manager = (PhotonVRManager)target;
-
-            if (UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
-            {
-                manager.CheckDefaultValues();
-            }
 
             base.OnInspectorGUI();
             GUILayout.Space(10);

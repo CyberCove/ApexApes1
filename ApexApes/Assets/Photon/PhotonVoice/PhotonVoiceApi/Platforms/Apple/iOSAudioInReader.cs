@@ -1,4 +1,4 @@
-﻿#if ((UNITY_IOS || UNITY_VISIONOS) && !UNITY_EDITOR) || __IOS__
+﻿#if (UNITY_IOS && !UNITY_EDITOR) || __IOS__
 using System;
 using System.Threading;
 using System.Runtime.InteropServices;
@@ -18,6 +18,7 @@ namespace Photon.Voice.IOS
         private static extern bool Photon_Audio_In_Read(IntPtr handle, float[] buf, int len);
 
         IntPtr audioIn;
+        private bool initializationFinished;
 
         public AudioInReader(AudioSessionParameters sessParam, ILogger logger)
         {
@@ -41,7 +42,11 @@ namespace Photon.Voice.IOS
                         {
                             Error = "Exception in AudioInReader constructor";
                         }
-                        logger.Log(LogLevel.Error, "[PV] AudioInReader: " + Error);
+                        logger.LogError("[PV] AudioInReader: " + Error);
+                    }
+                    finally
+                    {
+                        initializationFinished = true;
                     }
                 }
             });
@@ -67,20 +72,19 @@ namespace Photon.Voice.IOS
 
         public void Dispose()
         {
-            // disopse in a separate thread to avoid pauses in main thread execution
-            var t = new Thread(() =>
+            lock (this)
             {
-                lock (this)
+                while (!initializationFinished) // should never happen because of lock if the thread in constructor started before Dispose() call
                 {
-                    if (audioIn != IntPtr.Zero)
-                    {
-                        Photon_Audio_In_Destroy(audioIn);
-                        audioIn = IntPtr.Zero;
-                    }
+                    Thread.Sleep(1);
                 }
-            });
-            Util.SetThreadName(t, "[PV] IOSAudioInReaderDisp");
-            t.Start();
+
+                if (audioIn != IntPtr.Zero)
+                {
+                    Photon_Audio_In_Destroy(audioIn);
+                    audioIn = IntPtr.Zero;
+                }
+            }
         }
 
         public bool Read(float[] buf)

@@ -9,7 +9,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Threading;
 using System.Runtime.InteropServices;
 
 namespace Photon.Voice
@@ -18,18 +17,15 @@ namespace Photon.Voice
     {
         Config = 1,
         KeyFrame = 2,
-        PartNotBeg = 4,
+        PartialFrame = 4,
         EndOfStream = 8,
         FragNotBeg = 16,
         FragNotEnd = 32,
         FEC = 64,
-        PartNotEnd = 128,
 
         // 00 for unfragmented
         // 01 11 11 .. 11 10 for fragmented
         MaskFrag = FragNotBeg | FragNotEnd,
-
-        MaskPart = PartNotBeg | PartNotEnd,
     }
 
     /// <summary>Generic encoder interface.</summary>
@@ -85,7 +81,7 @@ namespace Photon.Voice
     public interface IDecoderDirect<B> : IDecoder
     {
         /// <summary>Callback to call when a new decoded data buffer is available.</summary>
-        Action<B> Output { set; }
+        Action<B> Output { get; set; }
     }
 
     /// <summary>Exception thrown if an unsupported audio sample type is encountered.</summary>
@@ -128,33 +124,8 @@ namespace Photon.Voice
 #if PHOTON_VOICE_VIDEO_ENABLE
         VideoVP8 = 21,
         VideoVP9 = 22,
-        VideoAV1 = 23,
         VideoH264 = 31,
-        VideoH265 = 32,
 #endif
-        // reserved for user codec implementatoins
-        Custom1 = 101,
-        Custom2 = 102,
-        Custom3 = 103,
-        Custom4 = 104,
-        Custom5 = 105,
-        Custom6 = 106,
-        Custom7 = 107,
-        Custom8 = 108,
-        Custom9 = 109,
-    }
-
-    public static partial class Utility
-    {
-        public static bool IsAudio(this Codec c)
-        {
-            return c == Codec.AudioOpus;
-        }
-
-        public static bool IsVideo(this Codec c)
-        {
-            return (byte)c >= 20 && (byte)c < 100;
-        }
     }
 
     public enum ImageFormat
@@ -335,43 +306,11 @@ namespace Photon.Voice
             Info = new ImageBufferInfo(width, height, new ImageBufferInfo.StrideSet(1, stride), imageFormat);
             Planes = new PlaneSet(1, buf);
         }
-
         public ImageBufferInfo Info;
         public PlaneSet Planes; // operator[] setter does not compile if this member is a property (because [] applies to a copy of the property)
 
-        private int refCnt = 1;
-
-        // reset for reuse
-        protected virtual void Reset()
-        {
-            refCnt = 1;
-            Info.Rotation = Rotation.Rotate0;
-            Info.Flip = Flip.None;
-        }
-
-        protected virtual void Free()
-        {
-        }
-
-        public void Retain()
-        {
-            Interlocked.Increment(ref refCnt);
-        }
-
-        public void Retain(int times)
-        {
-            Interlocked.Add(ref refCnt, times);
-        }
-
         // Release resources for dispose or reuse.
-        public void Release()
-        {
-            if(Interlocked.Decrement(ref refCnt) == 0)
-            {
-                Free();
-            }
-        }
-
+        public virtual void Release() { }
         public virtual void Dispose() { }
 
     }
@@ -391,16 +330,11 @@ namespace Photon.Voice
             }
         }
 
-        protected override void Free()
+        public override void Release()
         {
             if (pool != null)
             {
-                Reset();
-                pool.Free(this);
-            }
-            else
-            {
-                Dispose();
+                pool.Release(this);
             }
         }
 
@@ -436,16 +370,11 @@ namespace Photon.Voice
 
         public byte[][] PlaneBytes => planeBytes;
 
-        protected override void Free()
+        public override void Release()
         {
             if (pool != null)
             {
-                Reset();
-                pool.Free(this);
-            }
-            else
-            {
-                Dispose();
+                pool.Release(this);
             }
         }
 
@@ -482,16 +411,12 @@ namespace Photon.Voice
             Planes[0] = planeHandle.AddrOfPinnedObject();
         }
 
-        protected override void Free()
+        public override void Release()
         {
+            planeHandle.Free();
             if (pool != null)
             {
-                Reset();
-                pool.Free(this);
-            }
-            else
-            {
-                Dispose();
+                pool.Release(this);
             }
         }
 

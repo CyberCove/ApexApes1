@@ -1,108 +1,70 @@
+using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using Photon.Pun;
-using TMPro;
-using Photon.VR;
-using Photon.Voice.PUN;
-using Photon.VR.Player;
-using System.Text;
-using System.Collections;
-using System;
-using System.Collections.Generic;
+using Photon.Realtime;
 
-[RequireComponent(typeof(PhotonView))]
-public class LeaderBoard : MonoBehaviour
+public class LeaderBoard : MonoBehaviourPun
 {
-    [SerializeField] public TMP_Text[] displaySpot;
-    [SerializeField] public Renderer[] ColorSpot;
-    [SerializeField] public string WebHookURL;
-    [SerializeField] public Playfablogin playfablogin;
-    private bool hashed;
+    [Header("UI")]
+    public TMPro.TMP_Text[] displaySpot;
+    public Renderer[] ColorSpot;
+
+    [Header("Discord")]
+    public string WebHookURL;
 
     private bool Kicked = false;
 
-    private void Start()
+    void Update()
     {
-        if (GetComponent<PhotonView>().OwnershipTransfer != OwnershipOption.Takeover)
-        {
-            GetComponent<PhotonView>().OwnershipTransfer = OwnershipOption.Takeover;
-        }
-    }
-    private void Update()
-    {
-        if (PhotonNetwork.IsConnected && !hashed) 
-        {
-            ExitGames.Client.Photon.Hashtable hash = PhotonNetwork.LocalPlayer.CustomProperties;
-            hash["PlayfabID"] = playfablogin.MyPlayFabID;
-            PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
-            hashed = true;
-        }
-        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
-        {
-            if (!Kicked)
-            {
-                displaySpot[i].text = PhotonNetwork.PlayerList[i].NickName;
-                foreach (PhotonVRPlayer PVRP in FindObjectsOfType<PhotonVRPlayer>())
-                {
-                    if (PVRP.gameObject.GetComponent<PhotonView>().Owner == PhotonNetwork.PlayerList[i])
-                    {
-                        ColorSpot[i].material.color = JsonUtility.FromJson<Color>((string)PVRP.gameObject.GetComponent<PhotonView>().Owner.CustomProperties["Colour"]);
-                    }
-                }
-            }
-
-            else
-            {
-                if (PhotonNetwork.IsConnected)
-                {
-                    PhotonNetwork.Disconnect();
-                }
-                displaySpot[i].color = Color.red;
-                displaySpot[i].text = "You have been Kicked";
-
-            }
-        }
         for (int i = 0; i < displaySpot.Length; i++)
         {
-            if (i > PhotonNetwork.PlayerList.Length)
+            if (i < PhotonNetwork.PlayerList.Length)
             {
-                displaySpot[i].text = null;
-                ColorSpot[i].material.color = Color.white;
-            }
-        }
-    }
-
-    public void MutePress(int ButtonNumber)
-    {
-        if (PhotonNetwork.PlayerList.Length >= ButtonNumber - 1)
-        {
-            foreach (PhotonVRPlayer PVRP in FindObjectsOfType<PhotonVRPlayer>())
-            {
-                if (PVRP.gameObject.GetComponent<PhotonView>().Owner == PhotonNetwork.PlayerList[ButtonNumber - 1])
+                if (!Kicked)
+                    displaySpot[i].text = PhotonNetwork.PlayerList[i].NickName;
+                else
                 {
-                    AudioSource audioSource = PVRP.gameObject.GetComponent<PhotonVoiceView>().SpeakerInUse.gameObject.GetComponent<AudioSource>();
-                    audioSource.mute = !audioSource.mute;
-                    break;
+                    displaySpot[i].text = "You have been Kicked";
+                    displaySpot[i].color = Color.red;
                 }
             }
-        }
-    }
-
-    public void KickPress(int ButtonNumber)
-    {
-        if (PhotonNetwork.PlayerList.Length >= ButtonNumber - 1)
-        {
-            foreach (PhotonVRPlayer PVRP in FindObjectsOfType<PhotonVRPlayer>())
+            else
             {
-                if (PVRP.gameObject.GetComponent<PhotonView>().Owner == PhotonNetwork.PlayerList[ButtonNumber - 1])
-                {
-                    GetComponent<PhotonView>().RequestOwnership();
-                    GetComponent<PhotonView>().RPC("KickPlayer", PVRP.gameObject.GetComponent<PhotonView>().Owner);
-                }
+                displaySpot[i].text = "";
+                if (i < ColorSpot.Length) ColorSpot[i].material.color = Color.white;
             }
         }
     }
 
+    public void MutePress(int buttonNumber)
+    {
+        if (buttonNumber <= 0 || buttonNumber > PhotonNetwork.PlayerList.Length) return;
+
+        foreach (var p in FindObjectsOfType<Photon.Pun.PhotonView>())
+        {
+            if (p.Owner == PhotonNetwork.PlayerList[buttonNumber - 1])
+            {
+                var speaker = p.GetComponent<Photon.Voice.PUN.PhotonVoiceView>()?.SpeakerInUse;
+                if (speaker != null)
+                    speaker.mute = !speaker.mute;
+            }
+        }
+    }
+
+    public void KickPress(int buttonNumber)
+    {
+        if (buttonNumber <= 0 || buttonNumber > PhotonNetwork.PlayerList.Length) return;
+
+        foreach (var p in FindObjectsOfType<Photon.Pun.PhotonView>())
+        {
+            if (p.Owner == PhotonNetwork.PlayerList[buttonNumber - 1])
+            {
+                photonView.RPC("KickPlayer", p.Owner);
+            }
+        }
+    }
 
     [PunRPC]
     void KickPlayer()
@@ -110,40 +72,35 @@ public class LeaderBoard : MonoBehaviour
         Kicked = true;
     }
 
-    public void Report(int ButtonNumber)
+    public void Report(int buttonNumber)
     {
-        string playfabid = playfablogin.MyPlayFabID;
-        if (PhotonNetwork.PlayerList.Length >= ButtonNumber - 1)
-        {
-            foreach (PhotonVRPlayer PVRP in FindObjectsOfType<PhotonVRPlayer>())
-            {
-                if (PVRP.gameObject.GetComponent<PhotonView>().Owner == PhotonNetwork.PlayerList[ButtonNumber - 1])
-                {
-            SendtoWebhook(PhotonNetwork.PlayerList[ButtonNumber - 1].NickName + " " + ((string)PVRP.gameObject.GetComponent<PhotonView>().Owner.CustomProperties["PlayfabID"]) + " was reported by " + PlayerPrefs.GetString("Username", null) + " " + playfablogin.MyPlayFabID);
-                }
-                }
-        }
+        if (buttonNumber <= 0 || buttonNumber > PhotonNetwork.PlayerList.Length) return;
+
+        Photon.Realtime.Player reported = PhotonNetwork.PlayerList[buttonNumber - 1];
+        string reportedID = "Unknown";
+        if (reported.CustomProperties.ContainsKey("PlayFabID"))
+            reportedID = reported.CustomProperties["PlayFabID"].ToString();
+
+        SendToWebhook($"Reported Player: {reported.NickName} ({reportedID})");
     }
 
-    public void SendtoWebhook(string message)
+    public void SendToWebhook(string message)
     {
         StartCoroutine(PostToDiscord(message));
     }
 
     IEnumerator PostToDiscord(string message)
     {
-        string jsonPayload = "{\"content\": \"" + message + "\"}";
-
+        string jsonPayload = "{\"content\":\"" + message + "\"}";
         UnityWebRequest www = new UnityWebRequest(WebHookURL, "POST");
-        byte[] jsonToSend = new UTF8Encoding().GetBytes(jsonPayload);
-        www.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
-        www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
+        www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        www.downloadHandler = new DownloadHandlerBuffer();
         www.SetRequestHeader("Content-Type", "application/json");
+
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Reporting Webhook Error: " + www.error);
-        }
+            Debug.LogError("Discord Webhook Error: " + www.error);
     }
 }

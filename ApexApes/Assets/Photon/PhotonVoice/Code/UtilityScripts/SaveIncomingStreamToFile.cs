@@ -39,12 +39,12 @@
         {
             int bitsPerSample = 32;
             string filePath = this.GetFilePath(remoteVoiceLink);
-            this.Logger.Log(LogLevel.Info, "Incoming stream {0}, output file path: {1}", remoteVoiceLink.VoiceInfo, filePath);
+            this.Logger.LogInfo("Incoming stream {0}, output file path: {1}", remoteVoiceLink.VoiceInfo, filePath);
             WaveWriter waveWriter = new WaveWriter(filePath, remoteVoiceLink.VoiceInfo.SamplingRate, bitsPerSample, remoteVoiceLink.VoiceInfo.Channels);
             remoteVoiceLink.FloatFrameDecoded += f => { waveWriter.WriteSamples(f.Buf, 0, f.Buf.Length); };
             remoteVoiceLink.RemoteVoiceRemoved += () =>
             {
-                this.Logger.Log(LogLevel.Info, "Remote voice stream removed: Saving wav file.");
+                this.Logger.LogInfo("Remote voice stream removed: Saving wav file.");
                 waveWriter.Dispose();
             };
         }

@@ -1,6 +1,5 @@
 ﻿#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 using System;
-using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -18,31 +17,21 @@ namespace Photon.Voice.MacOS
 
         public AudioInPusher(int deviceID, ILogger logger)
         {
-            // initialization in a separate thread to avoid 0.5 - 1 sec. pauses in main thread execution
-            var t = new Thread(() =>
+            this.deviceID = deviceID;
+            try
             {
-                lock (instancePerHandle) // prevent concurrent initialization
+                handle = Photon_Audio_In_CreatePusher(instanceCnt, deviceID, nativePushCallback);
+                instancePerHandle.Add(instanceCnt++, this);
+            }
+            catch (Exception e)
+            {
+                Error = e.ToString();
+                if (Error == null) // should never happen but since Error used as validity flag, make sure that it's not null
                 {
-                    this.deviceID = deviceID;
-                    try
-                    {
-                        handle = Photon_Audio_In_CreatePusher(instanceCnt, deviceID, nativePushCallback);
-                        this.instanceID = instanceCnt;
-                        instancePerHandle.Add(instanceCnt++, this);
-                    }
-                    catch (Exception e)
-                    {
-                        Error = e.ToString();
-                        if (Error == null) // should never happen but since Error used as validity flag, make sure that it's not null
-                        {
-                            Error = "Exception in AudioInPusher constructor";
-                        }
-                        logger.Log(LogLevel.Error, "[PV] AudioInPusher: " + Error);
-                    }
+                    Error = "Exception in AudioInPusher constructor";
                 }
-            });
-            Util.SetThreadName(t, "[PV] MacOSAudioInPusherCtr");
-            t.Start();
+                logger.LogError("[PV] AudioInPusher: " + Error);
+            }
         }
 
         private int deviceID;
@@ -61,13 +50,12 @@ namespace Photon.Voice.MacOS
         }
 
         IntPtr handle;
-        int instanceID;
         Action<float[]> pushCallback;
         ObjectFactory<float[], int> bufferFactory;
 
         // Supposed to be called once at voice initialization.
         // Otherwise recreate native object (instead of adding 'set callback' method to native interface)
-        public void SetCallback(Action<float[]> callback, ObjectFactory<float[], int> bufferFactory, int optimalFrameSize)
+        public void SetCallback(Action<float[]> callback, ObjectFactory<float[], int> bufferFactory)
         {
             this.bufferFactory = bufferFactory;
             this.pushCallback = callback;
@@ -90,25 +78,12 @@ namespace Photon.Voice.MacOS
 
         public void Dispose()
         {
-            // disopse in a separate thread to avoid pauses in main thread execution
-            var t = new Thread(() =>
+            if (handle != IntPtr.Zero)
             {
-                lock (instancePerHandle)
-                {
-                    lock (instancePerHandle)
-                    {
-                        instancePerHandle.Remove(instanceID);
-
-                        if (handle != IntPtr.Zero)
-                        {
-                            Photon_Audio_In_Destroy(handle);
-                            handle = IntPtr.Zero;
-                        }
-                    }
-                }
-            });
-            Util.SetThreadName(t, "[PV] MacOSAudioInPusherDisp");
-            t.Start();            
+                Photon_Audio_In_Destroy(handle);
+                handle = IntPtr.Zero;
+            }
+            // TODO: Remove this from instancePerHandle
         }
     }
 }

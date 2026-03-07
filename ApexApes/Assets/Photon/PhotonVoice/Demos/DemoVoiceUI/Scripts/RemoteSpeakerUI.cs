@@ -6,6 +6,7 @@
     using UnityEngine.UI;
     using Realtime;
 
+    [RequireComponent(typeof(Speaker))]
     public class RemoteSpeakerUI : MonoBehaviour, IInRoomCallbacks
     {
 #pragma warning disable 649
@@ -36,7 +37,7 @@
         protected Speaker speaker;
         private AudioSource audioSource;
 
-        protected Player Actor { get { return this.loadBalancingClient != null && this.loadBalancingClient.CurrentRoom != null ? this.loadBalancingClient.CurrentRoom.GetPlayer(this.speaker.RemoteVoice.PlayerId) : null; } }
+        protected Player Actor { get { return this.loadBalancingClient.CurrentRoom != null ? this.loadBalancingClient.CurrentRoom.GetPlayer(this.speaker.RemoteVoice.PlayerId) : null; } }
 
         protected VoiceConnection voiceConnection;
         protected LoadBalancingClient loadBalancingClient;
@@ -105,11 +106,7 @@
             string nick = this.speaker.name;
             if (this.Actor != null)
             {
-                nick = this.Actor.NickName;
-                if (string.IsNullOrEmpty(nick))
-                {
-                    nick = string.Concat("user ", this.Actor.ActorNumber);
-                }
+                nick = this.Actor.UserId;
             }
             this.nameText.text = nick;
         }
@@ -138,7 +135,7 @@
 
         protected virtual void OnActorPropertiesChanged(Player targetPlayer, Hashtable changedProps)
         {
-            if (this.speaker != null && this.speaker.RemoteVoice != null && targetPlayer.ActorNumber == this.speaker.RemoteVoice.PlayerId)
+            if (targetPlayer.ActorNumber == this.Actor.ActorNumber)
             {
                 this.SetMutedState();
                 this.SetNickname();

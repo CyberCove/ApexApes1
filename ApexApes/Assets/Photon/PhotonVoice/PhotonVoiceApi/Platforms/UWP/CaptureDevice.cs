@@ -99,7 +99,7 @@ namespace Photon.Voice.UWP
 
                 if (mediaCapture != null)
                 {
-                    throw new InvalidOperationException("Capture device is already initialized");
+                    throw new InvalidOperationException("Camera is already initialized");
                 }
 
                 mediaCapture = new MediaCapture();
@@ -313,11 +313,6 @@ namespace Photon.Voice.UWP
             for (int i = 0; i < r.Count; i++)
             {
                 devices.Add(new DeviceInfo(r[i].Id, r[i].Name));
-            }
-
-            if (OnReady != null)
-            {
-                OnReady();
             }
         }
 

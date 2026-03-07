@@ -31,23 +31,13 @@ namespace Photon.Realtime
     using System.Text;
     using UnityEngine.Networking;
 
-    #if UNITY_2021_3_OR_NEWER
-    using UnityEditor.Build;
-    #endif
 
     [InitializeOnLoad]
     public static class PhotonEditorUtils
     {
         /// <summary>Stores a flag which tells Editor scripts if the PhotonEditor.OnProjectChanged got called since initialization.</summary>
         /// <remarks>If not, the AssetDatabase is likely not usable yet and instances of ScriptableObject can't be loaded.</remarks>
-        [Obsolete("Directly check EditorApplication.isUpdating to figure out if assets are being imported at the given time.")]
-        public static bool ProjectChangedWasCalled 
-        {
-            get
-            {
-                return UnityEditor.EditorApplication.isUpdating;
-            }
-        } 
+        public static bool ProjectChangedWasCalled;
 
 
         /// <summary>True if the ChatClient of the Photon Chat API is available. If so, the editor may (e.g.) show additional options in settings.</summary>
@@ -117,10 +107,7 @@ namespace Photon.Realtime
                     continue;
                 }
 
-                var defineSymbols = GetScriptingDefines(group)
-                                   .Split(';')
-                                   .Select(d => d.Trim())
-                                   .ToList();
+                var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').Select(d => d.Trim()).ToList();
 
                 if (!defineSymbols.Contains(defineSymbol))
                 {
@@ -128,7 +115,7 @@ namespace Photon.Realtime
 
                     try
                     {
-                        SetScriptingDefines(group, string.Join(";", defineSymbols.ToArray()));
+                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", defineSymbols.ToArray()));
                     }
                     catch (Exception e)
                     {
@@ -139,28 +126,6 @@ namespace Photon.Realtime
         }
 
 
-        private static string GetScriptingDefines(BuildTargetGroup group)
-        {
-            #if UNITY_2021_3_OR_NEWER
-            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(group);
-            var defineSymbolsString = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
-            #else
-            var defineSymbolsString = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
-            #endif
-
-            return defineSymbolsString;
-        }
-
-        private static void SetScriptingDefines(BuildTargetGroup group, string defines)
-        {
-            #if UNITY_2021_3_OR_NEWER
-            var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(group);
-            PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, defines);
-            #else
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(group, defines);
-            #endif
-        }
-
         /// <summary>
         /// Removes PUN2's Script Define Symbols from project
         /// </summary>
@@ -169,15 +134,16 @@ namespace Photon.Realtime
             foreach (BuildTarget target in Enum.GetValues(typeof(BuildTarget)))
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
+
                 if (group == BuildTargetGroup.Unknown)
                 {
                     continue;
                 }
 
-                var defineSymbols = GetScriptingDefines(group)
-                                   .Split(';')
-                                   .Select(d => d.Trim())
-                                   .ToList();
+                var defineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group)
+                    .Split(';')
+                    .Select(d => d.Trim())
+                    .ToList();
 
                 List<string> newDefineSymbols = new List<string>();
                 foreach (var symbol in defineSymbols)
@@ -192,7 +158,7 @@ namespace Photon.Realtime
 
                 try
                 {
-                    SetScriptingDefines(group, string.Join(";", newDefineSymbols.ToArray()));
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", newDefineSymbols.ToArray()));
                 }
                 catch (Exception e)
                 {

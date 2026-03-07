@@ -137,7 +137,7 @@ namespace Photon.Voice
                 throw new Exception(LogPrefix + ": non 0 frame size required for framed stream");
             }
 
-            OptimalSourceFrameSize = voiceInfo.FrameSize;
+            int optimalInFrameSize = voiceInfo.FrameSize;
             if (voiceInfo.SamplingRate != 0 && inSampleRate != voiceInfo.SamplingRate)
             {
                 if (voiceInfo.SamplingRate <= 0 || inSampleRate / voiceInfo.SamplingRate > 10 || voiceInfo.SamplingRate / inSampleRate > 10)
@@ -146,27 +146,25 @@ namespace Photon.Voice
                 }
                 const bool INTERPOLATE = true;
                 this.framer = new FramerResampler<T>(voiceInfo.FrameSize, voiceInfo.Channels, voiceInfo.SamplingRate, inSampleRate, INTERPOLATE);
-                OptimalSourceFrameSize = voiceInfo.FrameSize * inSampleRate / voiceInfo.SamplingRate;
-                this.voiceClient.logger.Log(LogLevel.Warning, "[PV] Local voice #" + this.id + " audio source frequency " + inSampleRate + " and encoder sampling rate " + voiceInfo.SamplingRate + " do not match. Resampling will occur before encoding (FramerResampler" + (INTERPOLATE ? ", interp" : "") +  ").");
+                optimalInFrameSize = voiceInfo.FrameSize * inSampleRate / voiceInfo.SamplingRate;
+                this.voiceClient.logger.LogWarning("[PV] Local voice #" + this.id + " audio source frequency " + inSampleRate + " and encoder sampling rate " + voiceInfo.SamplingRate + " do not match. Resampling will occur before encoding (FramerResampler" + (INTERPOLATE ? ", interp" : "") +  ").");
             }
             else // if no resampling required
             {
                 this.framer = new Framer<T>(voiceInfo.FrameSize);
-                this.voiceClient.logger.Log(LogLevel.Info, "[PV] Local voice #" + this.id + " audio source frequency and encoder sampling rate are the same " + voiceInfo.SamplingRate + ". No resampling required (Framer).");
+                this.voiceClient.logger.LogInfo("[PV] Local voice #" + this.id + " audio source frequency and encoder sampling rate are the same " + voiceInfo.SamplingRate + ". No resampling required (Framer).");
             }
 
-            this.bufferFactory = new ArrayPoolSet<T>(DATA_POOL_CAPACITY, Name, OptimalSourceFrameSize, 5);
+            this.bufferFactory = new FactoryPrimitiveArrayPool<T>(DATA_POOL_CAPACITY, Name + " Data", optimalInFrameSize);
         }
 
         bool dataEncodeThreadStarted;
         Queue<T[]> pushDataQueue = new Queue<T[]>();
         AutoResetEvent pushDataQueueReady = new AutoResetEvent(false);
 
-        public int OptimalSourceFrameSize { get; private set; }
-
         /// <summary><see cref="PushData(T[])" and <see cref="PushDataAsync(T[])" callers should use this factory for optimal performance/>/>.</summary>
-        public ObjectFactory<T[], int> BufferFactory { get { return bufferFactory; } }
-        ObjectFactory<T[], int> bufferFactory;
+        public FactoryPrimitiveArrayPool<T> BufferFactory { get { return bufferFactory; } }
+        FactoryPrimitiveArrayPool<T> bufferFactory;
 
         /// <summary>Wether this LocalVoiceFramed has capacity for more data buffers to be pushed asynchronously.</summary>
         public bool PushDataAsyncReady { get { lock (pushDataQueue) return pushDataQueue.Count < DATA_POOL_CAPACITY - 1; } } // 1 slot for buffer currently processed and not contained either by pool or queue
@@ -188,7 +186,7 @@ namespace Photon.Voice
 
             if (!dataEncodeThreadStarted)
             {
-                voiceClient.logger.Log(LogLevel.Info, LogPrefix + ": Starting data encode thread");
+                voiceClient.logger.LogInfo(LogPrefix + ": Starting data encode thread");
 #if NETFX_CORE
                 Windows.System.Threading.ThreadPool.RunAsync((x) =>
                 {
@@ -218,7 +216,7 @@ namespace Photon.Voice
                 this.bufferFactory.Free(buf, buf.Length);
                 if (framesSkipped == framesSkippedNextLog)
                 {
-                    voiceClient.logger.Log(LogLevel.Warning, LogPrefix + ": PushData queue overflow. Frames skipped: " + (framesSkipped + 1));
+                    voiceClient.logger.LogWarning(LogPrefix + ": PushData queue overflow. Frames skipped: " + (framesSkipped + 1));
                     framesSkippedNextLog = framesSkipped + 10;
                 }
                 framesSkipped++;
@@ -275,7 +273,7 @@ namespace Photon.Voice
             }
             catch (Exception e)
             {
-                voiceClient.logger.Log(LogLevel.Error, LogPrefix + ": Exception in encode thread: " + e);
+                voiceClient.logger.LogError(LogPrefix + ": Exception in encode thread: " + e);
                 throw e;
             }
             finally
@@ -289,7 +287,7 @@ namespace Photon.Voice
                 pushDataQueueReady.Close();
 #endif
 
-                voiceClient.logger.Log(LogLevel.Info, LogPrefix + ": Exiting data encode thread");
+                voiceClient.logger.LogInfo(LogPrefix + ": Exiting data encode thread");
 
 #if PROFILE
                 UnityEngine.Profiling.Profiler.EndThreadProfiling();
@@ -374,6 +372,7 @@ namespace Photon.Voice
                     pushDataQueueReady.Set(); // let worker exit
                 }
             }
+            base.Dispose();
         }
     }
 }

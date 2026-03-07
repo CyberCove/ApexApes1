@@ -70,7 +70,7 @@ namespace Photon.Voice.Unity
                 audioIn = new AndroidJavaObject("com.exitgames.photon.audioinaec.AudioInAEC");
                 //bool aecAvailable = audioIn.Call<bool>("AECIsAvailable");
                 int minBufSize = audioIn.Call<int>("GetMinBufferSize", SAMPLE_RATE_44100, Channels);
-                logger.Log(LogLevel.Info, "[PV] AndroidAudioInAEC: AndroidJavaObject created: aec: {0}/{1}, agc: {2}/{3}, ns: {4}/{5} minBufSize: {6}",
+                logger.LogInfo("[PV] AndroidAudioInAEC: AndroidJavaObject created: aec: {0}/{1}, agc: {2}/{3}, ns: {4}/{5} minBufSize: {6}",
                     enableAEC, audioIn.Call<bool>("AECIsAvailable"),
                     enableAGC, audioIn.Call<bool>("AGCIsAvailable"),
                     enableNS, audioIn.Call<bool>("NSIsAvailable"),
@@ -84,12 +84,12 @@ namespace Photon.Voice.Unity
                 if (ok)
                 {
                     audioInSampleRate = audioIn.Call<int>("GetSampleRate");
-                    logger.Log(LogLevel.Info, "[PV] AndroidAudioInAEC: AndroidJavaObject started: {0}, sampling rate: {1}, channels: {2}, record buffer size: {3}", ok, SamplingRate, Channels, minBufSize * 4);
+                    logger.LogInfo("[PV] AndroidAudioInAEC: AndroidJavaObject started: {0}, sampling rate: {1}, channels: {2}, record buffer size: {3}", ok, SamplingRate, Channels, minBufSize * 4);
                 }
                 else
                 {
                     Error = "[PV] AndroidAudioInAEC constructor: calling Start java method failure";
-                    logger.Log(LogLevel.Error, "[PV] AndroidAudioInAEC: {0}", Error);
+                    logger.LogError("[PV] AndroidAudioInAEC: {0}", Error);
                 }
             }
             catch (Exception e)
@@ -99,18 +99,19 @@ namespace Photon.Voice.Unity
                 {
                     Error = "Exception in AndroidAudioInAEC constructor";
                 }
-                logger.Log(LogLevel.Error, "[PV] AndroidAudioInAEC: {0}", Error);
+                logger.LogError("[PV] AndroidAudioInAEC: {0}", Error);
             }
         }
 
         // Supposed to be called once at voice initialization.
         // Otherwise recreate native object (instead of adding 'set callback' method to java interface)
-        public void SetCallback(Action<short[]> callback, ObjectFactory<short[], int> bufferFactory, int optimalFrameSize)
+        public void SetCallback(Action<short[]> callback, ObjectFactory<short[], int> bufferFactory)
         {
             if (Error == null)
             {
+                var voiceFrameSize = bufferFactory.Info;
                 // setting to voice FrameSize lets to avoid framing procedure
-                javaBuf = AndroidJNI.NewGlobalRef(AndroidJNI.NewShortArray(optimalFrameSize));
+                javaBuf = AndroidJNI.NewGlobalRef(AndroidJNI.NewShortArray(voiceFrameSize));
                 this.callback.SetCallback(callback, javaBuf);
                 var meth = AndroidJNI.GetMethodID(audioIn.GetRawClass(), "SetBuffer", "([S)Z");
                 bool ok = AndroidJNI.CallBooleanMethod(audioIn.GetRawObject(), meth, new jvalue[] { new jvalue() { l = javaBuf } });
@@ -121,7 +122,7 @@ namespace Photon.Voice.Unity
             }
             if (Error != null)
             {
-                logger.Log(LogLevel.Error, "[PV] AndroidAudioInAEC: {0}", Error);
+                logger.LogError("[PV] AndroidAudioInAEC: {0}", Error);
             }
         }
 

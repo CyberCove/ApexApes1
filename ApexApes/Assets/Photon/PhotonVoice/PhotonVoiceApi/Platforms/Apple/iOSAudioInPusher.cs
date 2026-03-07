@@ -1,4 +1,4 @@
-﻿#if ((UNITY_IOS || UNITY_VISIONOS) && !UNITY_EDITOR) || __IOS__
+﻿#if (UNITY_IOS && !UNITY_EDITOR) || __IOS__
 using System;
 using System.Threading;
 using System.Collections.Generic;
@@ -17,6 +17,7 @@ namespace Photon.Voice.IOS
         private static extern void Photon_Audio_In_Destroy(IntPtr handler);
 
         private delegate void CallbackDelegate(int instanceID, IntPtr buf, int len);
+        private bool initializationFinished;
 
         public AudioInPusher(AudioSessionParameters sessParam, ILogger logger)
         {
@@ -39,7 +40,11 @@ namespace Photon.Voice.IOS
                         {
                             Error = "Exception in AudioInPusher constructor";
                         }
-                        logger.Log(LogLevel.Error, "[PV] AudioInPusher: " + Error);
+                        logger.LogError("[PV] AudioInPusher: " + Error);
+                    }
+                    finally
+                    {
+                        initializationFinished = true;
                     }
                 }
             });
@@ -73,7 +78,7 @@ namespace Photon.Voice.IOS
 
         // Supposed to be called once at voice initialization.
         // Otherwise recreate native object (instead of adding 'set callback' method to native interface)
-        public void SetCallback(Action<float[]> callback, ObjectFactory<float[], int> bufferFactory, int optimalFrameSize)
+        public void SetCallback(Action<float[]> callback, ObjectFactory<float[], int> bufferFactory)
         {
             this.bufferFactory = bufferFactory;
             this.pushCallback = callback;
@@ -107,22 +112,21 @@ namespace Photon.Voice.IOS
 
         public void Dispose()
         {
-            // disopse in a separate thread to avoid pauses in main thread execution
-            var t = new Thread(() =>
+            lock (instancePerHandle)
             {
-                lock (instancePerHandle)
-                {
-                    instancePerHandle.Remove(instanceID);
+                instancePerHandle.Remove(instanceID);
 
-                    if (handle != IntPtr.Zero)
-                    {
-                        Photon_Audio_In_Destroy(handle);
-                        handle = IntPtr.Zero;
-                    }
+                while (!initializationFinished) // should never happen because of lock if the thread in constructor started before Dispose() call
+                {
+                    Thread.Sleep(1);
                 }
-            });
-            Util.SetThreadName(t, "[PV] IOSAudioInPusherDisp");
-            t.Start();
+
+                if (handle != IntPtr.Zero)
+                {
+                    Photon_Audio_In_Destroy(handle);
+                    handle = IntPtr.Zero;
+                }
+            }
         }
     }
 }

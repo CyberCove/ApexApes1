@@ -11,6 +11,7 @@
 
 namespace Photon.Voice.Unity
 {
+    using ExitGames.Client.Photon;
     using UnityEngine;
 
     // All Voice components should inherit this class. If this is not possible, reimplenet it directly in the component.
@@ -45,7 +46,6 @@ namespace Photon.Voice.Unity
         class LoggerImpl : Voice.ILogger
         {
             VoiceLogger voiceLogger;
-            LogLevel voiceLoggerLastLevel; // used if voiceLogger is already destroyed during scene unload
             Object obj;
             // name cache required because obj.name is available only on the main thread
             string objName;
@@ -54,7 +54,6 @@ namespace Photon.Voice.Unity
             public void SetVoiceLogger(VoiceLogger voiceLogger, Object obj, string tag)
             {
                 this.voiceLogger = voiceLogger;
-                this.voiceLoggerLastLevel = voiceLogger.LogLevel;
                 this.obj = obj;
                 this.tag = tag;
             }
@@ -64,8 +63,7 @@ namespace Photon.Voice.Unity
                 objName = n;
             }
 
-            public LogLevel Level => voiceLogger ? voiceLogger.LogLevel : voiceLoggerLastLevel;
-            public void Log(LogLevel level, string fmt, params object[] args)
+            private void Log(DebugLevel level, string fmt, params object[] args)
             {
                 if (voiceLogger != null)
                 {
@@ -73,15 +71,31 @@ namespace Photon.Voice.Unity
                     {
                         UnityLogger.Log(level, obj, tag, objName, fmt, args);
                     }
-                    voiceLoggerLastLevel = voiceLogger.LogLevel;
                 }
                 else
                 {
-                    if (voiceLoggerLastLevel >= level)
-                    {
-                        UnityLogger.Log(level, obj, tag, objName, fmt, args);
-                    }
+                    UnityLogger.Log(level, obj, tag, objName, fmt, args);
                 }
+            }
+
+            public void LogError(string fmt, params object[] args)
+            {
+                Log(DebugLevel.ERROR, fmt, args);
+            }
+
+            public void LogWarning(string fmt, params object[] args)
+            {
+                Log(DebugLevel.WARNING, fmt, args);
+            }
+
+            public void LogInfo(string fmt, params object[] args)
+            {
+                Log(DebugLevel.INFO, fmt, args);
+            }
+
+            public void LogDebug(string fmt, params object[] args)
+            {
+                Log(DebugLevel.ALL, fmt, args);
             }
         }
 
@@ -107,7 +121,7 @@ namespace Photon.Voice.Unity
             if (voiceLogger == null)
             {
                 // logging this message with just created voiceLogger produces confusing items relevant to mb only
-                logger.Log(LogLevel.Warning, "VoiceLogger object is not found in the scene. Creating one.");
+                logger.LogWarning("VoiceLogger object is not found in the scene. Creating one.");
                 voiceLogger = VoiceLogger.CreateRootLogger();
             }
 

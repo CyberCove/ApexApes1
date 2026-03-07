@@ -189,7 +189,7 @@ namespace Photon.Voice.PUN.UtilityScripts
             {
                 foreach (var l in FindObjectsOfType<VoiceLogger>())
                 {
-                    l.LogLevel = LogLevel.Trace;
+                    l.LogLevel = DebugLevel.ALL;
                 }
             }
         }

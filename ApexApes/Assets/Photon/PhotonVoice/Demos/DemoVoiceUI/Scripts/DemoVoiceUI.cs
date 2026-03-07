@@ -143,8 +143,6 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
         private readonly Color redColor = new Color(1.0f, 0.0f, 0.0f, 1f);
         private readonly Color defaultColor = new Color(0.0f, 0.0f, 0.0f, 1f);
 
-        private System.Func<IAudioDesc> toneInputFactory = () => new AudioUtil.ToneAudioReader<float>(null, 440, 48000, 2); // WebGL supports only Reader
-
         private void Start()
         {
             this.connectAndJoin = this.GetComponent<ConnectAndJoin>();
@@ -158,8 +156,7 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
             this.SetDefaults();
             this.InitUiCallbacks();
             this.GetSavedNickname();
-            // tone is the default for InputSourceType.Factory although other factory sources may exist in the demo
-            this.voiceConnection.PrimaryRecorder.InputFactory = toneInputFactory;
+            this.voiceConnection.PrimaryRecorder.InputFactory = () => new AudioUtil.ToneAudioPusher<float>(440, 100, 48000, 2);
 
             this.voiceConnection.SpeakerLinked += this.OnSpeakerCreated;
             this.voiceConnection.Client.AddCallbackTarget(this);
@@ -285,7 +282,7 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
 
         private void ToggleAudioClipStreaming(bool isOn)
         {
-            //this.microphoneSelector.gameObject.SetActive(!isOn && !this.audioToneToggle.isOn);
+            this.microphoneSelector.gameObject.SetActive(!isOn && !this.audioToneToggle.isOn);
             if (isOn)
             {
                 this.audioToneToggle.SetValue(false);
@@ -293,22 +290,21 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
             }
             else if (!this.audioToneToggle.isOn)
             {
-                microphoneSelector.SwitchToSelectedMic();
+                this.voiceConnection.PrimaryRecorder.SourceType = Recorder.InputSourceType.Microphone;
             }
         }
 
         private void ToggleAudioToneFactory(bool isOn)
         {
-            //this.microphoneSelector.gameObject.SetActive(!isOn && !this.streamAudioClipToggle.isOn);
+            this.microphoneSelector.gameObject.SetActive(!isOn && !this.streamAudioClipToggle.isOn);
             if (isOn)
             {
                 this.streamAudioClipToggle.SetValue(false);
                 this.voiceConnection.PrimaryRecorder.SourceType = Recorder.InputSourceType.Factory;
-                this.voiceConnection.PrimaryRecorder.InputFactory = toneInputFactory;
             }
             else if (!this.streamAudioClipToggle.isOn)
             {
-                microphoneSelector.SwitchToSelectedMic();
+                this.voiceConnection.PrimaryRecorder.SourceType = Recorder.InputSourceType.Microphone;
             }
         }
 
@@ -486,7 +482,7 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
 
             this.reverseStreamDelayInputField.SetSingleOnEndEditCallback(this.OnReverseStreamDelayChanged);
 
-            //this.microphoneSelector.SetSingleOnValueChangedCallback(this.OnMicrophoneChanged);
+            this.microphoneSelector.SetSingleOnValueChangedCallback(this.OnMicrophoneChanged);
 
             this.androidAgcToggle.SetSingleOnValueChangedCallback(this.OnAndroidMicSettingsChanged);
             this.androidAecToggle.SetSingleOnValueChangedCallback(this.OnAndroidMicSettingsChanged);
@@ -500,14 +496,14 @@ namespace Photon.Voice.Unity.Demos.DemoVoiceUI
             this.reliableTransmissionToggle.SetValue(this.voiceConnection.PrimaryRecorder.ReliableMode);
             this.encryptionToggle.SetValue(this.voiceConnection.PrimaryRecorder.Encrypt);
             this.streamAudioClipToggle.SetValue(this.voiceConnection.PrimaryRecorder.SourceType == Recorder.InputSourceType.AudioClip);
-            this.audioToneToggle.SetValue(this.voiceConnection.PrimaryRecorder.SourceType == Recorder.InputSourceType.Factory && this.voiceConnection.PrimaryRecorder.InputFactory == this.toneInputFactory); // may be also another custom factory
+            this.audioToneToggle.SetValue(this.voiceConnection.PrimaryRecorder.SourceType == Recorder.InputSourceType.Factory);
             this.photonVadToggle.SetValue(this.voiceConnection.PrimaryRecorder.VoiceDetection);
 
             this.androidAgcToggle.SetValue(this.voiceConnection.PrimaryRecorder.AndroidMicrophoneAGC);
             this.androidAecToggle.SetValue(this.voiceConnection.PrimaryRecorder.AndroidMicrophoneAEC);
             this.androidNsToggle.SetValue(this.voiceConnection.PrimaryRecorder.AndroidMicrophoneNS);
 
-            //this.microphoneSelector.gameObject.SetActive(!this.streamAudioClipToggle.isOn && !this.audioToneToggle.isOn);
+            this.microphoneSelector.gameObject.SetActive(!this.streamAudioClipToggle.isOn && !this.audioToneToggle.isOn);
 
             if (this.webRtcDspGameObject != null)
             {

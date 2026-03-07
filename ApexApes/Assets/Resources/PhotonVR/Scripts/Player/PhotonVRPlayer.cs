@@ -6,6 +6,8 @@ using Photon.Pun;
 
 using TMPro;
 
+using Photon.VR.Cosmetics;
+
 namespace Photon.VR.Player
 {
     public class PhotonVRPlayer : MonoBehaviourPun
@@ -16,11 +18,14 @@ namespace Photon.VR.Player
         public Transform LeftHand;
         public Transform RightHand;
         [Tooltip("The objects that will get the colour of the player applied to them")]
-        public List<SkinnedMeshRenderer> ColourObjects;
+        public List<MeshRenderer> ColourObjects;
 
-        [Space]
-        [Tooltip("Feel free to add as many slots as you feel necessary")]
-        public List<CosmeticSlot> CosmeticSlots = new List<CosmeticSlot>();
+        [Header("Cosmetics Parents")]
+        public Transform HeadCosmetics;
+        public Transform FaceCosmetics;
+        public Transform BodyCosmetics;
+        public Transform LeftHandCosmetics;
+        public Transform RightHandCosmetics;
 
         [Header("Other")]
         public TextMeshPro NameText;
@@ -77,36 +82,44 @@ namespace Photon.VR.Player
                 NameText.text = photonView.Owner.NickName;
 
             // Colour
-            foreach (SkinnedMeshRenderer renderer in ColourObjects)
+            foreach (MeshRenderer renderer in ColourObjects)
             {
                 if(renderer != null)
                     renderer.material.color = JsonUtility.FromJson<Color>((string)photonView.Owner.CustomProperties["Colour"]);
             }
 
             // Cosmetics - it's a little ugly to look at
-            Dictionary<string, string> cosmetics = (Dictionary<string, string>)photonView.Owner.CustomProperties["Cosmetics"];
-            foreach (KeyValuePair<string, string> cosmetic in cosmetics)
-            {
-                Debug.Log(cosmetic.Key);
-                foreach (CosmeticSlot slot in CosmeticSlots)
-                {
-                    if (slot.SlotName == cosmetic.Key)
-                    {
-                        foreach (Transform cos in slot.Object)
-                            if (cos.name != cosmetic.Value)
-                                cos.gameObject.SetActive(false);
-                            else
-                                cos.gameObject.SetActive(true);
-                    }
-                }
-            }
-        }
-
-        [Serializable]
-        public class CosmeticSlot
-        {
-            public string SlotName;
-            public Transform Object;
+            PhotonVRCosmeticsData cosmetics = JsonUtility.FromJson<PhotonVRCosmeticsData>((string)photonView.Owner.CustomProperties["Cosmetics"]);
+            if(HeadCosmetics != null)
+                foreach (Transform cos in HeadCosmetics)
+                    if (cos.name != cosmetics.Head)
+                        cos.gameObject.SetActive(false);
+                    else
+                        cos.gameObject.SetActive(true);
+            if (BodyCosmetics != null)
+                foreach (Transform cos in BodyCosmetics.transform)
+                    if (cos.name != cosmetics.Body)
+                        cos.gameObject.SetActive(false);
+                    else
+                        cos.gameObject.SetActive(true);
+            if (FaceCosmetics != null)
+                foreach (Transform cos in FaceCosmetics.transform)
+                    if (cos.name != cosmetics.Face)
+                        cos.gameObject.SetActive(false);
+                    else
+                        cos.gameObject.SetActive(true);
+            if (LeftHandCosmetics != null)
+                foreach (Transform cos in LeftHandCosmetics.transform)
+                    if (cos.name != cosmetics.LeftHand)
+                        cos.gameObject.SetActive(false);
+                    else
+                        cos.gameObject.SetActive(true);
+            if (RightHandCosmetics != null)
+                foreach (Transform cos in RightHandCosmetics.transform)
+                    if (cos.name != cosmetics.RightHand)
+                        cos.gameObject.SetActive(false);
+                    else
+                        cos.gameObject.SetActive(true);
         }
     }
 }

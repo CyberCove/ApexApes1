@@ -19,11 +19,6 @@ namespace Photon.Voice.Unity
                 var d = unityDevs[i];
                 devices.Add(new DeviceInfo(d));
             }
-
-            if (OnReady != null)
-            {
-                OnReady();
-            }
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -40,7 +35,6 @@ namespace Photon.Voice.Unity
     }
 
 #if PHOTON_VOICE_VIDEO_ENABLE
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
     public class VideoInEnumerator : DeviceEnumeratorBase
     {
         public VideoInEnumerator(ILogger logger) : base(logger)
@@ -57,11 +51,6 @@ namespace Photon.Voice.Unity
                 var d = unityDevs[i];
                 devices.Add(new DeviceInfo(d.name));
             }
-
-            if (OnReady != null)
-            {
-                OnReady();
-            }
         }
 
         public override string Error { get { return null; } }
@@ -70,6 +59,5 @@ namespace Photon.Voice.Unity
         {
         }
     }
-#endif
 #endif
 }
